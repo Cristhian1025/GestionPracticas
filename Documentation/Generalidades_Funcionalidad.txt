@@ -1,0 +1,46 @@
+-- Flujo de funcionamiento del sistema de informacio    
+
+
+**1. Gestión de usuarios (Admin)**
+El admin crea todas las cuentas y asigna roles. Ningún usuario se registra solo. Una vez creada la cuenta, el usuario recibe sus credenciales y puede ingresar.
+
+---
+
+**2. Configuración inicial (Centro Progresa)**
+Centro Progresa registra las empresas aliadas y publica ofertas laborales, indicando para qué programa y nivel de práctica aplica cada oferta. También gestiona los programas académicos por sede.
+
+---
+
+**3. El estudiante llega como Prospecto**
+El estudiante ya completó el formulario externo de preinscripción. Con eso obtiene acceso al sistema. Su estado inicial es `prospecto`.
+
+---
+
+**4. Exploración y postulación**
+El estudiante navega el tablero de ofertas filtrado por su programa y nivel. Tiene dos opciones:
+- Marcarse como `postulado` en una oferta publicada en el sistema
+- Registrar una empresa propia que consiguió por su cuenta
+
+En ambos casos su estado cambia a `postulado`. Centro Progresa ve esto en el dashboard.
+
+---
+
+**5. Carta de Presentación**
+Cuando el estudiante está en contacto con una empresa, solicita la Carta de Presentación. El sistema lo redirige al formulario externo (Office Forms) y le muestra previamente los campos que debe llevar listos.
+
+---
+
+**6. Carta de Funciones**
+La empresa entrega al estudiante la Carta de Funciones. El estudiante la sube al sistema. El Coordinador del programa recibe la notificación y la revisa:
+- Si la **aprueba** → se crea formalmente la práctica y el estado del estudiante pasa a `en_practica`
+- Si la **rechaza** → deja un comentario y el estudiante debe subir una nueva versión
+
+---
+
+**7. Práctica en curso**
+Con la carta aprobada, la práctica queda `en_curso`. El seguimiento de bitácoras y evaluaciones ocurre en Moodle, fuera de este sistema.
+
+---
+
+**8. Finalización**
+Cuando termina el período, Centro Progresa o el Coordinador marca la práctica como `finalizada` y el estado del estudiante vuelve a estar disponible para un siguiente nivel si aplica.
