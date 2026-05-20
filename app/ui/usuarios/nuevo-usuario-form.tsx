@@ -146,29 +146,38 @@ export default function NuevoUsuarioForm({ programas }: { programas: { id: strin
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 mt-4">Nivel de Práctica</label>
+              <select
+                name="nivel_practica"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Selecciona nivel</option>
+                <option value="1">Nivel 1</option>
+                <option value="2">Nivel 2</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nivel de Práctica</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Estado Académico</label>
                 <select
-                  name="nivel_practica"
+                  name="estado_academico"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Selecciona nivel</option>
-                  <option value="1">Nivel 1</option>
-                  <option value="2">Nivel 2</option>
+                  <option value="habilitado">Habilitado</option>
+                  <option value="finalizado">Finalizado</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Estado del Estudiante</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Estado de Búsqueda</label>
                 <select
-                  name="estado_estudiante"
+                  name="estado_busqueda"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Selecciona estado</option>
-                  <option value="prospecto">Prospecto</option>
+                  <option value="sin_postulaciones">Sin postulaciones</option>
                   <option value="postulado">Postulado</option>
-                  <option value="en_practica">En práctica</option>
-                  <option value="finalizado">Finalizado</option>
+                  <option value="contratado">Contratado</option>
                 </select>
               </div>
             </div>

@@ -19,18 +19,7 @@ export default async function UsuariosPage(props: { searchParams?: Promise<{ que
   const totalPages = Math.ceil((count || 0) / 20)
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-base font-semibold text-gray-900">Centro Progresa</h1>
-            <p className="text-xs text-gray-500">Panel de administración</p>
-          </div>
-          <UserDropdown />
-        </div>
-      </header>
-
-      <div className="max-w-5xl mx-auto px-6 py-8">
+    <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-gray-900">Gestión de Usuarios</h2>
           <Link
@@ -59,7 +48,8 @@ export default async function UsuariosPage(props: { searchParams?: Promise<{ que
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Programa</th>
-                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Estado Acad.</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Búsqueda</th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha de creación</th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Cuenta</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
@@ -99,7 +89,12 @@ export default async function UsuariosPage(props: { searchParams?: Promise<{ que
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500 capitalize">
-                          {user.estado_estudiante?.replace('_', ' ') || '-'}
+                          {user.estado_academico?.replace('_', ' ') || '-'}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500 capitalize">
+                          {user.estado_busqueda?.replace('_', ' ') || '-'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -129,6 +124,5 @@ export default async function UsuariosPage(props: { searchParams?: Promise<{ que
         
         <Pagination totalPages={totalPages} />
       </div>
-    </div>
   )
 }
