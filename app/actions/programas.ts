@@ -47,7 +47,7 @@ export async function crearPrograma(formData: FormData) {
     nombre: formData.get('nombre') as string,
     codigo: formData.get('codigo') as string || null,
     sede: formData.get('sede') as string,
-    niveles_practica: formData.get('niveles_practica') ? parseInt(formData.get('niveles_practica') as string) : 1,
+    meses_practica: formData.get('meses_practica') ? parseInt(formData.get('meses_practica') as string) : 6,
     activo: formData.get('activo') === 'true'
   }
 
@@ -69,7 +69,7 @@ export async function actualizarPrograma(id: string, formData: FormData) {
     nombre: formData.get('nombre') as string,
     codigo: formData.get('codigo') as string || null,
     sede: formData.get('sede') as string,
-    niveles_practica: formData.get('niveles_practica') ? parseInt(formData.get('niveles_practica') as string) : 1,
+    meses_practica: formData.get('meses_practica') ? parseInt(formData.get('meses_practica') as string) : 6,
     activo: formData.get('activo') === 'true'
   }
 

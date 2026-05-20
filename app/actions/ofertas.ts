@@ -54,11 +54,7 @@ export async function obtenerOpcionesFormulario() {
     .eq('activa', true)
     .order('nombre')
 
-  // Obtener coordinadores (usuarios con rol 'coordinador')
-  const { data: coordinadores } = await supabase
-    .from('profiles')
-    .select('id, nombre, apellido')
-    .eq('rol', 'coordinador')
+  // Obtener coordinadores (eliminado, ahora es texto libre)
 
   // Obtener programas (asumiendo que existe una tabla 'programas' con 'nombre')
   const { data: programas } = await supabase
@@ -66,9 +62,8 @@ export async function obtenerOpcionesFormulario() {
     .select('id, nombre')
     .order('nombre')
 
-  return { 
+  return {
     empresas: empresas || [], 
-    coordinadores: coordinadores || [], 
     programas: programas || [] 
   }
 }
@@ -81,9 +76,9 @@ export async function crearOferta(formData: FormData) {
 
   const newOferta = {
     empresa_id: formData.get('empresa_id') as string,
-    coordinador_id: formData.get('coordinador_id') as string,
+    coordinador_nombre: formData.get('coordinador_nombre') as string || null,
     programa_id: formData.get('programa_id') as string || null,
-    nivel_practica: formData.get('nivel_practica') ? parseInt(formData.get('nivel_practica') as string) : null,
+    meses_practica: formData.get('meses_practica') ? parseInt(formData.get('meses_practica') as string) : null,
     titulo: formData.get('titulo') as string,
     descripcion: formData.get('descripcion') as string || null,
     modalidad_contrato: formData.get('modalidad_contrato') as string || null,
@@ -94,7 +89,7 @@ export async function crearOferta(formData: FormData) {
     modalidad_trabajo: formData.get('modalidad_trabajo') as string || null,
     remuneracion: formData.get('remuneracion') as string || null,
     horario: formData.get('horario') as string || null,
-    cubre_arl: formData.get('cubre_arl') === 'true'
+    cubre_arl: true // Oculto en UI, siempre true
   }
 
   const { error } = await supabase.from('ofertas').insert(newOferta)
@@ -114,9 +109,9 @@ export async function actualizarOferta(id: string, formData: FormData) {
   
   const updatedOferta = {
     empresa_id: formData.get('empresa_id') as string,
-    coordinador_id: formData.get('coordinador_id') as string,
+    coordinador_nombre: formData.get('coordinador_nombre') as string || null,
     programa_id: formData.get('programa_id') as string || null,
-    nivel_practica: formData.get('nivel_practica') ? parseInt(formData.get('nivel_practica') as string) : null,
+    meses_practica: formData.get('meses_practica') ? parseInt(formData.get('meses_practica') as string) : null,
     titulo: formData.get('titulo') as string,
     descripcion: formData.get('descripcion') as string || null,
     modalidad_contrato: formData.get('modalidad_contrato') as string || null,
@@ -127,7 +122,7 @@ export async function actualizarOferta(id: string, formData: FormData) {
     modalidad_trabajo: formData.get('modalidad_trabajo') as string || null,
     remuneracion: formData.get('remuneracion') as string || null,
     horario: formData.get('horario') as string || null,
-    cubre_arl: formData.get('cubre_arl') === 'true'
+    cubre_arl: true
   }
 
   const { error } = await supabase

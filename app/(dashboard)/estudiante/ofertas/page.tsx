@@ -26,7 +26,7 @@ export default async function EstudianteOfertasPage(props: {
       {ofertas && ofertas.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {ofertas.map((oferta: any) => {
-            const yaPostulado = postuladas?.includes(oferta.id)
+            const yaPostulado = postuladas?.includes(oferta.id) ?? false
 
             return (
               <div key={oferta.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow">

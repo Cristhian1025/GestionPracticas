@@ -60,7 +60,7 @@ export default async function OfertasPage(props: {
                     <td className="py-3 px-4">
                       <div className="text-sm text-gray-900">{oferta.programas?.nombre || 'Cualquier Programa'}</div>
                       <div className="text-xs text-gray-500">
-                        {oferta.nivel_practica ? `Práctica Profesional ${oferta.nivel_practica}` : 'Cualquier Nivel'}
+                        {oferta.meses_practica ? `${oferta.meses_practica} Meses` : 'Cualquier duración'}
                       </div>
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-700">{oferta.vacantes}</td>

@@ -12,7 +12,7 @@ export async function listarOfertasParaEstudiante(page: number = 1, limit: numbe
   // Obtener perfil del estudiante para saber su programa
   const { data: perfil } = await supabase
     .from('profiles')
-    .select('programa_id, nivel_practica')
+    .select('programa_id, meses_practica')
     .eq('id', user.id)
     .single()
 

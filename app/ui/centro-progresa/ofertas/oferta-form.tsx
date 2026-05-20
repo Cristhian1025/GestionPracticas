@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 interface OpcionesFormulario {
   empresas: { id: string; nombre: string }[]
-  coordinadores: { id: string; nombre: string; apellido: string }[]
+  // coordinadores removed since it's now a text field
   programas: { id: string; nombre: string }[]
 }
 
@@ -73,24 +73,19 @@ export default function OfertaForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Coordinador a cargo *</label>
-          <select
-            name="coordinador_id"
+          <label className="block text-sm font-medium text-gray-700 mb-1">Contacto / Coordinador de la oferta *</label>
+          <input
+            type="text"
+            name="coordinador_nombre"
             required
-            defaultValue={oferta?.coordinador_id || ''}
+            defaultValue={oferta?.coordinador_nombre || ''}
+            placeholder="Ej. Juan Pérez - Jefe de RRHH"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 bg-white"
-          >
-            <option value="" disabled>Selecciona un coordinador</option>
-            {opciones.coordinadores.map(coord => (
-              <option key={coord.id} value={coord.id}>
-                {coord.nombre} {coord.apellido}
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Programa Académico</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Perfil Laboral</label>
           <select
             name="programa_id"
             defaultValue={oferta?.programa_id || ''}
@@ -104,15 +99,16 @@ export default function OfertaForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nivel de Práctica</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Meses de Práctica</label>
           <select
-            name="nivel_practica"
-            defaultValue={oferta?.nivel_practica || ''}
+            name="meses_practica"
+            defaultValue={oferta?.meses_practica || ''}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 bg-white"
           >
-            <option value="">Cualquier Nivel</option>
-            <option value="1">Práctica Profesional I</option>
-            <option value="2">Práctica Profesional II</option>
+            <option value="">Cualquier duración</option>
+            <option value="6">6 meses</option>
+            <option value="12">12 meses</option>
+            <option value="18">18 meses</option>
           </select>
         </div>
 
@@ -122,7 +118,7 @@ export default function OfertaForm({
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Título de la Oferta / Cargo *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Cargo o categoría *</label>
           <input
             type="text"
             name="titulo"
@@ -207,7 +203,7 @@ export default function OfertaForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Remuneración</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Remuneración o pago de sostenimiento</label>
           <input
             type="text"
             name="remuneracion"
@@ -228,16 +224,7 @@ export default function OfertaForm({
           />
         </div>
 
-        <div className="flex items-center gap-2 mt-2">
-          <input
-            type="checkbox"
-            name="cubre_arl"
-            value="true"
-            defaultChecked={oferta?.cubre_arl}
-            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-          />
-          <span className="text-sm font-medium text-gray-700">La empresa cubre ARL</span>
-        </div>
+
 
         <div className="md:col-span-2 border-t border-gray-100 pt-4 mt-2">
           <label className="flex items-center gap-2 cursor-pointer">

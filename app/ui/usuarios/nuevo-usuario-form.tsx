@@ -147,14 +147,15 @@ export default function NuevoUsuarioForm({ programas }: { programas: { id: strin
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 mt-4">Nivel de Práctica</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 mt-4">Meses de Práctica</label>
               <select
-                name="nivel_practica"
+                name="meses_practica"
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Selecciona nivel</option>
-                <option value="1">Nivel 1</option>
-                <option value="2">Nivel 2</option>
+                <option value="">Selecciona duración</option>
+                <option value="6">6 Meses</option>
+                <option value="12">12 Meses</option>
+                <option value="18">18 Meses</option>
               </select>
             </div>
 

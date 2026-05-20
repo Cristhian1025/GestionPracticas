@@ -40,7 +40,7 @@ export default async function ProgramasPage(props: {
               <tr className="border-b border-gray-200">
                 <th className="py-3 px-4 text-sm font-semibold text-gray-600">Nombre / Código</th>
                 <th className="py-3 px-4 text-sm font-semibold text-gray-600">Sede</th>
-                <th className="py-3 px-4 text-sm font-semibold text-gray-600">Niveles de Práctica</th>
+                <th className="py-3 px-4 text-sm font-semibold text-gray-600">Meses de Práctica</th>
                 <th className="py-3 px-4 text-sm font-semibold text-gray-600">Estado</th>
                 <th className="py-3 px-4 text-sm font-semibold text-gray-600 text-right">Acciones</th>
               </tr>
@@ -55,7 +55,7 @@ export default async function ProgramasPage(props: {
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-700">{programa.sede}</td>
                     <td className="py-3 px-4 text-sm text-gray-700">
-                      {programa.niveles_practica} {programa.niveles_practica === 1 ? 'Nivel' : 'Niveles'}
+                      {programa.meses_practica} Meses
                     </td>
                     <td className="py-3 px-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

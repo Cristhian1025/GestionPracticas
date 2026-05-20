@@ -49,7 +49,7 @@ export async function crearUsuario(formData: FormData) {
   
   const telefono          = formData.get('telefono') as string
   const programa_id       = formData.get('programa_id') as string
-  const nivel_practica    = formData.get('nivel_practica') ? parseInt(formData.get('nivel_practica') as string) : null
+  const meses_practica    = formData.get('meses_practica') ? parseInt(formData.get('meses_practica') as string) : null
   const estado_academico  = formData.get('estado_academico') as string
   const estado_busqueda   = formData.get('estado_busqueda') as string
 
@@ -63,7 +63,7 @@ export async function crearUsuario(formData: FormData) {
       rol,
       telefono: telefono || null,
       programa_id: programa_id || null,
-      nivel_practica: nivel_practica || null,
+      meses_practica: meses_practica || null,
       estado_academico: estado_academico || null,
       estado_busqueda: estado_busqueda || null
     }
@@ -79,7 +79,7 @@ export async function crearUsuario(formData: FormData) {
   const { error: updateError } = await admin.from('profiles').update({
     telefono: telefono || null,
     programa_id: programa_id || null,
-    nivel_practica: nivel_practica || null,
+    meses_practica: meses_practica || null,
     estado_academico: estado_academico || null,
     estado_busqueda: estado_busqueda || null
   }).eq('id', data.user.id)
@@ -104,7 +104,7 @@ export async function listarUsuarios(page: number = 1, query: string = '', rol: 
     .from('profiles')
     .select(`
       id, nombre, apellido, email, rol, created_at, is_active,
-      telefono, nivel_practica, estado_academico, estado_busqueda,
+      telefono, meses_practica, estado_academico, estado_busqueda,
       programas ( id, nombre )
     `, { count: 'exact' })
     .order('created_at', { ascending: false })
@@ -188,7 +188,7 @@ export async function actualizarUsuario(id: string, formData: FormData) {
   
   const telefono          = formData.get('telefono') as string
   const programa_id       = formData.get('programa_id') as string
-  const nivel_practica    = formData.get('nivel_practica') ? parseInt(formData.get('nivel_practica') as string) : null
+  const meses_practica    = formData.get('meses_practica') ? parseInt(formData.get('meses_practica') as string) : null
   const estado_academico  = formData.get('estado_academico') as string
   const estado_busqueda   = formData.get('estado_busqueda') as string
 
@@ -201,7 +201,7 @@ export async function actualizarUsuario(id: string, formData: FormData) {
       rol,
       telefono: telefono || null,
       programa_id: programa_id || null,
-      nivel_practica: nivel_practica || null,
+      meses_practica: meses_practica || null,
       estado_academico: estado_academico || null,
       estado_busqueda: estado_busqueda || null
     }
@@ -224,7 +224,7 @@ export async function actualizarUsuario(id: string, formData: FormData) {
     rol,
     telefono: telefono || null,
     programa_id: programa_id || null,
-    nivel_practica: nivel_practica || null,
+    meses_practica: meses_practica || null,
     estado_academico: estado_academico || null,
     estado_busqueda: estado_busqueda || null
   }).eq('id', id)

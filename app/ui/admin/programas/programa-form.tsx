@@ -80,15 +80,16 @@ export default function ProgramaForm({ programa }: { programa?: any }) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Niveles de Práctica *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Meses de Práctica *</label>
           <select
-            name="niveles_practica"
+            name="meses_practica"
             required
-            defaultValue={programa?.niveles_practica || '1'}
+            defaultValue={programa?.meses_practica || '6'}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 bg-white"
           >
-            <option value="1">1 Nivel (Ej. Práctica Profesional)</option>
-            <option value="2">2 Niveles (Ej. Práctica I y Práctica II)</option>
+            <option value="6">6 Meses</option>
+            <option value="12">12 Meses</option>
+            <option value="18">18 Meses</option>
           </select>
         </div>
 
