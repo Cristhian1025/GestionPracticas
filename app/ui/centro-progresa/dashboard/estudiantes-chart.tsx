@@ -21,8 +21,8 @@ export default function EstudiantesChart({ data }: { data: ChartData[] }) {
   }
 
   return (
-    <div className="h-96 w-full">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="w-full" style={{ height: '400px', minHeight: '400px' }}>
+      <ResponsiveContainer width="99%" height="100%">
         <BarChart
           data={data}
           margin={{

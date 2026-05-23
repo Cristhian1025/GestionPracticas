@@ -22,7 +22,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="bg-white border-t border-gray-200 mt-auto">
+    <footer className="bg-[rgb(228,228,228)] border-t border-gray-200 mt-auto">
       <div className="max-w-7xl mx-auto px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         
         {/* Logo Izquierdo: UNIMINUTO */}
@@ -30,7 +30,7 @@ export default function Footer() {
           <div className="flex items-center gap-2">
             {/* Intentamos cargar la imagen, si no existe muestra el texto estilizado */}
             <img
-              src="/logos/uniminuto.png"
+              src="/logos/LogoUnim.png"
               alt="UNIMINUTO"
               onError={(e) => {
                 // Si falla la carga, ocultamos el img y mostramos el texto alternativo
@@ -59,7 +59,7 @@ export default function Footer() {
         <div className="flex items-center">
           <div className="flex items-center gap-2">
             <img
-              src="/logos/centro-progresa.png"
+              src="/logos/logocpepe.png"
               alt="Centro Progresa EPE"
               onError={(e) => {
                 e.currentTarget.style.display = 'none'
