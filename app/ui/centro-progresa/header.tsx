@@ -6,6 +6,7 @@ import UserDropdown from '@/app/ui/auth/user-dropdown'
 
 const links = [
   { name: 'Dashboard', href: '/centro-progresa/dashboard' },
+  { name: 'Estudiantes', href: '/centro-progresa/estudiantes' },
   { name: 'Empresas Aliadas', href: '/centro-progresa/empresas' },
   { name: 'Ofertas Laborales', href: '/centro-progresa/ofertas' },
 ]
@@ -16,7 +17,7 @@ export default function CentroProgresaHeader() {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
-        
+
         {/* Lado Izquierdo: Título y Navegación */}
         <div className="flex items-center gap-8">
           <div>
@@ -31,11 +32,10 @@ export default function CentroProgresaHeader() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive
                       ? 'bg-blue-50 text-blue-700'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+                    }`}
                 >
                   {link.name}
                 </Link>

@@ -4,7 +4,7 @@ import { listarPostulacionesEstudiante } from '@/app/actions/tramites'
 import Link from 'next/link'
 
 export default async function EstudianteTramitesPage() {
-  const { data: postulaciones } = await listarPostulacionesEstudiante()
+  const { data: postulaciones, estado_busqueda } = await listarPostulacionesEstudiante()
 
   return (
     <main className="max-w-4xl mx-auto px-6 py-8">
@@ -62,6 +62,7 @@ export default async function EstudianteTramitesPage() {
                       <UploadCartaFunciones 
                         postulacionId={postulacion.id} 
                         documentoActual={cartaFunciones} 
+                        estadoBusqueda={estado_busqueda}
                       />
                     </div>
                   )

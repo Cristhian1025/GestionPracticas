@@ -88,6 +88,9 @@ export async function postularAOfertaSistema(ofertaId: string) {
     return { error: error.message }
   }
 
+  // Actualizar estado de búsqueda
+  await supabase.from('profiles').update({ estado_busqueda: 'postulado' }).eq('id', user.id)
+
   revalidatePath('/estudiante/ofertas')
   return { success: true }
 }
@@ -116,6 +119,9 @@ export async function registrarOfertaExterna(formData: FormData) {
     console.error('Error registrando oferta externa:', error)
     return { error: error.message }
   }
+
+  // Actualizar estado de búsqueda
+  await supabase.from('profiles').update({ estado_busqueda: 'postulado' }).eq('id', user.id)
 
   revalidatePath('/estudiante/ofertas')
   return { success: true }

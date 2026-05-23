@@ -1,16 +1,19 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { subirCartaFunciones } from '@/app/actions/tramites'
+import { subirCartaFunciones, marcarComoContratado } from '@/app/actions/tramites'
 
 export default function UploadCartaFunciones({ 
   postulacionId, 
-  documentoActual 
+  documentoActual,
+  estadoBusqueda
 }: { 
   postulacionId: string
-  documentoActual?: any 
+  documentoActual?: any
+  estadoBusqueda?: string | null
 }) {
   const [isPending, startTransition] = useTransition()
+  const [isContractPending, startContractTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -24,6 +27,20 @@ export default function UploadCartaFunciones({
         setError(result.error)
       } else {
         alert('Documento enviado correctamente para revisión.')
+      }
+    })
+  }
+
+  const handleMarcarContratado = () => {
+    if (!confirm('¿Estás seguro de marcar esta práctica como Contratado? Esto oficializará el inicio de tu práctica.')) return
+
+    startContractTransition(async () => {
+      setError(null)
+      const result = await marcarComoContratado(postulacionId)
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        alert('¡Felicidades! Has sido marcado como Contratado oficialmente.')
       }
     })
   }
@@ -69,6 +86,29 @@ export default function UploadCartaFunciones({
             {/* TODO: Si es rechazado, idealmente debería poder subir uno nuevo. 
                 Por ahora requeriría eliminar el anterior o actualizarlo. */}
             <p className="text-xs text-gray-500 mt-2">Por favor contacta a tu coordinador para reenviar el documento corregido.</p>
+          </div>
+        )}
+
+        {isAprobado && estadoBusqueda === 'carta_aprobada' && (
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-lg text-center">
+            <h5 className="text-sm font-bold text-blue-900 mb-2">¡Tu Carta ha sido Aprobada!</h5>
+            <p className="text-sm text-blue-700 mb-3">
+              Para formalizar el inicio de tu práctica en el sistema, por favor haz clic en el siguiente botón.
+            </p>
+            <button
+              onClick={handleMarcarContratado}
+              disabled={isContractPending}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+            >
+              {isContractPending ? 'Procesando...' : 'Marcar como Contratado'}
+            </button>
+            {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
+          </div>
+        )}
+
+        {estadoBusqueda === 'contratado' && isAprobado && (
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-center text-sm font-medium text-green-800">
+            ✅ Práctica formalizada y en curso.
           </div>
         )}
       </div>
