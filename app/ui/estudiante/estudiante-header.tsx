@@ -7,6 +7,7 @@ import UserDropdown from '@/app/ui/auth/user-dropdown'
 const links = [
   { name: 'Ofertas Laborales', href: '/estudiante/ofertas' },
   { name: 'Mis Trámites', href: '/estudiante/tramites' },
+  { name: 'Guía de Prácticas', href: '/estudiante/informacion' },
 ]
 
 export default function EstudianteHeader() {

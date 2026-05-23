@@ -19,6 +19,30 @@ function getAdminClient() {
   )
 }
 
+function calcularPeriodoAcademico(modalidad: string, fechaRegistro: Date = new Date()) {
+  const mes = fechaRegistro.getMonth() + 1 // 1-12
+  const ano = fechaRegistro.getFullYear()
+
+  if (modalidad === 'semestral') {
+    if (mes >= 5 && mes <= 7) return `${ano}-60` // Mayo, Junio, Julio
+    if (mes === 12) return `${ano + 1}-10`       // Diciembre
+    if (mes <= 2) return `${ano}-10`             // Enero, Febrero
+    if (mes >= 8 && mes <= 11) return `${ano + 1}-10`
+    return `${ano}-10`
+  } else if (modalidad === 'cuatrimestral') {
+    if (mes === 12) return `${ano + 1}-40`
+    if (mes <= 1) return `${ano}-40`             // Enero
+    if (mes >= 4 && mes <= 5) return `${ano}-45` // Abril, Mayo
+    if (mes >= 8 && mes <= 9) return `${ano}-50` // Agosto, Septiembre
+    
+    if (mes >= 2 && mes <= 3) return `${ano}-45`
+    if (mes >= 6 && mes <= 7) return `${ano}-50`
+    if (mes >= 10 && mes <= 11) return `${ano + 1}-40`
+    return `${ano}-40`
+  }
+  return null
+}
+
 export async function crearUsuario(formData: FormData) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -74,6 +98,15 @@ export async function crearUsuario(formData: FormData) {
 
   if (error) return { error: error.message }
 
+  // Calcular periodo académico si es estudiante y tiene programa
+  let periodoAcademico = null
+  if (rol === 'estudiante' && programa_id) {
+    const { data: programaInfo } = await admin.from('programas').select('modalidad').eq('id', programa_id).single()
+    if (programaInfo?.modalidad) {
+      periodoAcademico = calcularPeriodoAcademico(programaInfo.modalidad)
+    }
+  }
+
   // Actualizar la tabla profiles con los campos extra
   // (por si el trigger de la base de datos no está configurado para copiarlos automáticamente)
   const { error: updateError } = await admin.from('profiles').update({
@@ -81,7 +114,8 @@ export async function crearUsuario(formData: FormData) {
     programa_id: programa_id || null,
     meses_practica: meses_practica || null,
     estado_academico: estado_academico || null,
-    estado_busqueda: estado_busqueda || null
+    estado_busqueda: estado_busqueda || null,
+    periodo_academico: periodoAcademico
   }).eq('id', data.user.id)
 
   if (updateError) {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { subirCartaFunciones, marcarComoContratado } from '@/app/actions/tramites'
+import { subirCartaFunciones, marcarComoContratado, eliminarDocumentoRechazado } from '@/app/actions/tramites'
 
 export default function UploadCartaFunciones({ 
   postulacionId, 
@@ -45,6 +45,18 @@ export default function UploadCartaFunciones({
     })
   }
 
+  const handleEliminarRechazado = () => {
+    if (!confirm('¿Estás seguro de eliminar este documento rechazado para poder subir uno nuevo?')) return
+
+    startTransition(async () => {
+      setError(null)
+      const result = await eliminarDocumentoRechazado(documentoActual.id)
+      if (result?.error) {
+        setError(result.error)
+      }
+    })
+  }
+
   // Si ya hay un documento, mostrar su estado en lugar del formulario de subida
   if (documentoActual) {
     const isPendiente = documentoActual.estado === 'pendiente'
@@ -79,13 +91,25 @@ export default function UploadCartaFunciones({
           </a>
         </div>
 
-        {isRechazado && documentoActual.observaciones && (
+        {isRechazado && (
           <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-lg">
-            <h5 className="text-xs font-bold text-red-800 mb-1">Observaciones del Coordinador:</h5>
-            <p className="text-sm text-red-700">{documentoActual.observaciones}</p>
-            {/* TODO: Si es rechazado, idealmente debería poder subir uno nuevo. 
-                Por ahora requeriría eliminar el anterior o actualizarlo. */}
-            <p className="text-xs text-gray-500 mt-2">Por favor contacta a tu coordinador para reenviar el documento corregido.</p>
+            {documentoActual.observaciones && (
+              <>
+                <h5 className="text-xs font-bold text-red-800 mb-1">Observaciones del Coordinador:</h5>
+                <p className="text-sm text-red-700 mb-4">{documentoActual.observaciones}</p>
+              </>
+            )}
+            <div className="flex items-center justify-between mt-2 pt-3 border-t border-red-200">
+              <p className="text-xs text-red-600 font-medium">Sube una nueva versión del documento.</p>
+              <button
+                onClick={handleEliminarRechazado}
+                disabled={isPending}
+                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-50"
+              >
+                {isPending ? 'Eliminando...' : 'Eliminar y Volver a Subir'}
+              </button>
+            </div>
+            {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
           </div>
         )}
 

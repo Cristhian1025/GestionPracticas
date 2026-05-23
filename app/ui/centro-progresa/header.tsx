@@ -9,6 +9,7 @@ const links = [
   { name: 'Estudiantes', href: '/centro-progresa/estudiantes' },
   { name: 'Empresas Aliadas', href: '/centro-progresa/empresas' },
   { name: 'Ofertas Laborales', href: '/centro-progresa/ofertas' },
+  { name: 'Vacantes', href: '/centro-progresa/vacantes' },
 ]
 
 export default function CentroProgresaHeader() {

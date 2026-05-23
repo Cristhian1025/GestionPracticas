@@ -3,29 +3,51 @@ import Link from 'next/link'
 
 import KPIsEstadoBusqueda from '@/app/ui/centro-progresa/dashboard/kpis-estado-busqueda'
 import EstudiantesChart from '@/app/ui/centro-progresa/dashboard/estudiantes-chart'
+import DashboardFilters from '@/app/ui/centro-progresa/dashboard/dashboard-filters'
 
-export default async function CentroProgresaDashboard() {
+export default async function CentroProgresaDashboard(props: { searchParams: Promise<{ [key: string]: string | undefined }> }) {
+  const searchParams = await props.searchParams
+  const programa_id = searchParams?.programa_id
+  const periodo = searchParams?.periodo
+
   const supabase = await createClient()
 
   // 1. Consultar KPIs principales simultáneamente para mayor rapidez
+  let estudiantesPracticaQuery = supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('rol', 'estudiante').eq('estado_estudiante', 'en_practica')
+  let totalEstudiantesQuery = supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('rol', 'estudiante')
+  let perfilesQuery = supabase.from('profiles').select('estado_busqueda, programas(nombre)').eq('rol', 'estudiante')
+
+  if (programa_id) {
+    estudiantesPracticaQuery = estudiantesPracticaQuery.eq('programa_id', programa_id)
+    totalEstudiantesQuery = totalEstudiantesQuery.eq('programa_id', programa_id)
+    perfilesQuery = perfilesQuery.eq('programa_id', programa_id)
+  }
+  if (periodo) {
+    estudiantesPracticaQuery = estudiantesPracticaQuery.eq('periodo_academico', periodo)
+    totalEstudiantesQuery = totalEstudiantesQuery.eq('periodo_academico', periodo)
+    perfilesQuery = perfilesQuery.eq('periodo_academico', periodo)
+  }
+
   const [
     { count: empresasCount },
     { count: ofertasCount },
     { count: estudiantesPractica },
     { count: totalEstudiantes },
     { data: ultimasOfertas },
-    { data: perfiles }
+    { data: perfiles },
+    { data: programasActivos }
   ] = await Promise.all([
     supabase.from('empresas').select('*', { count: 'exact', head: true }).eq('activa', true),
     supabase.from('ofertas').select('*', { count: 'exact', head: true }).eq('estado', 'activa'),
-    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('rol', 'estudiante').eq('estado_estudiante', 'en_practica'),
-    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('rol', 'estudiante'),
+    estudiantesPracticaQuery,
+    totalEstudiantesQuery,
     supabase.from('ofertas')
       .select('id, titulo, modalidad_trabajo, empresas(nombre)')
       .eq('estado', 'activa')
       .order('created_at', { ascending: false })
       .limit(4),
-    supabase.from('profiles').select('estado_busqueda, programas(nombre)').eq('rol', 'estudiante')
+    perfilesQuery,
+    supabase.from('programas').select('id, nombre').eq('activo', true)
   ])
 
   // Procesamiento para KPIs de estados de búsqueda
@@ -69,8 +91,8 @@ export default async function CentroProgresaDashboard() {
   const chartData = Object.values(chartDataMap).sort((a: any, b: any) => a.programa.localeCompare(b.programa))
 
   // Cálculo para barra de progreso
-  const porcentajeVinculados = totalEstudiantes && totalEstudiantes > 0 
-    ? Math.round(((estudiantesPractica || 0) / totalEstudiantes) * 100) 
+  const porcentajeVinculados = totalEstudiantes && totalEstudiantes > 0
+    ? Math.round(((estudiantesPractica || 0) / totalEstudiantes) * 100)
     : 0
 
   return (
@@ -81,6 +103,8 @@ export default async function CentroProgresaDashboard() {
           Indicadores en tiempo real de empresas, ofertas y estudiantes.
         </p>
       </div>
+
+      <DashboardFilters programas={programasActivos || []} />
 
       {/* KPIs de Estados de Búsqueda */}
       <div className="mb-8">
@@ -132,14 +156,14 @@ export default async function CentroProgresaDashboard() {
 
       {/* Zona de Información Detallada */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         {/* Últimas Ofertas Publicadas */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-blue-500"></span>
             Últimas Ofertas Publicadas
           </h2>
-          
+
           <div className="space-y-4">
             {ultimasOfertas && ultimasOfertas.length > 0 ? (
               ultimasOfertas.map((oferta: any) => (
@@ -168,7 +192,7 @@ export default async function CentroProgresaDashboard() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold mb-2">Estado General Saludable</h2>
+          <h2 className="text-2xl font-bold mb-2">Estado General</h2>
           <p className="text-blue-100 max-w-sm">
             El sistema está operando correctamente. Has registrado un total de {empresasCount || 0} empresas que actualmente mantienen {ofertasCount || 0} convocatorias abiertas para los estudiantes.
           </p>

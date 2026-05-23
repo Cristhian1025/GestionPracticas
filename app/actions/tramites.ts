@@ -134,6 +134,60 @@ export async function subirCartaFunciones(postulacionId: string, formData: FormD
   return { success: true }
 }
 
+export async function eliminarDocumentoRechazado(documentoId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'No autorizado' }
+
+  // 1. Obtener documento para verificar que pertenece al usuario y está rechazado
+  const { data: documento, error: docError } = await supabase
+    .from('documentos')
+    .select('id, url_storage, estado, postulaciones!inner(estudiante_id)')
+    .eq('id', documentoId)
+    .single()
+
+  if (docError || !documento) return { error: 'Documento no encontrado.' }
+  
+  const postulacion = documento.postulaciones as any
+  if (postulacion.estudiante_id !== user.id) return { error: 'No autorizado.' }
+  if (documento.estado !== 'rechazado') return { error: 'Solo puedes eliminar documentos rechazados.' }
+
+  // 2. Extraer fileName de la URL (opcional, si queremos borrar del storage)
+  // Por simplicidad y evitar errores con el RLS del Storage, usamos el adminClient
+  const { createClient: createAdminClient } = await import('@supabase/supabase-js')
+  const adminClient = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+
+  try {
+    const urlParts = documento.url_storage.split('/')
+    const fileName = urlParts[urlParts.length - 1]
+    await adminClient.storage.from('documentos_practica').remove([fileName])
+  } catch (e) {
+    console.error('Error al intentar borrar del storage:', e)
+  }
+
+  // 3. Borrar registro de BD
+  const { error: deleteError } = await adminClient
+    .from('documentos')
+    .delete()
+    .eq('id', documentoId)
+
+  if (deleteError) {
+    console.error('Error al borrar documento:', deleteError)
+    return { error: 'No se pudo eliminar el documento de la base de datos.' }
+  }
+
+  // 4. Actualizar estado del estudiante para que vuelva a estar solo "postulado" (o el que corresponda)
+  await supabase.from('profiles').update({ estado_busqueda: 'postulado' }).eq('id', user.id)
+
+  revalidatePath('/estudiante/tramites')
+  return { success: true }
+}
+
 export async function marcarComoContratado(postulacionId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -171,11 +225,37 @@ export async function marcarComoContratado(postulacionId: string) {
     cargo = postulacion.cargo_aspirado || 'Practicante Externa'
   }
 
-  // 3. Insertar la práctica oficial
-  const { error: insertPracticaError } = await supabase
+  // 3. Obtener el coordinador que aprobó la carta, o cualquier coordinador activo
+  const { createClient: createAdminClient } = await import('@supabase/supabase-js')
+  const adminClient = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+
+  const { data: docAprobado } = await adminClient
+    .from('documentos')
+    .select('revisado_por')
+    .eq('postulacion_id', postulacion.id)
+    .eq('tipo', 'carta_funciones')
+    .eq('estado', 'aprobado')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  let coordinadorId = docAprobado?.revisado_por
+
+  if (!coordinadorId) {
+    const { data: adminUser } = await adminClient.from('profiles').select('id').eq('rol', 'coordinador').limit(1).single()
+    coordinadorId = adminUser?.id
+  }
+
+  // 4. Insertar la práctica oficial usando adminClient para evadir el RLS de inserción
+  const { error: insertPracticaError } = await adminClient
     .from('practicas')
     .insert({
       estudiante_id: user.id,
+      coordinador_id: coordinadorId,
       empresa_id: empresaId,
       postulacion_id: postulacion.id,
       modalidad_contrato: modalidadContrato,

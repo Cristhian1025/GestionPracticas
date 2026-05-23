@@ -93,6 +93,19 @@ export default function ProgramaForm({ programa }: { programa?: any }) {
           </select>
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Modalidad *</label>
+          <select
+            name="modalidad"
+            required
+            defaultValue={programa?.modalidad || 'semestral'}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 bg-white"
+          >
+            <option value="semestral">Semestral</option>
+            <option value="cuatrimestral">Cuatrimestral</option>
+          </select>
+        </div>
+
         <div className="md:col-span-2 mt-4">
           <label className="flex items-center gap-2 cursor-pointer">
             <input

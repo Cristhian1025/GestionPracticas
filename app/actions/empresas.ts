@@ -114,3 +114,64 @@ export async function cambiarEstadoEmpresa(id: string, activar: boolean) {
   revalidatePath('/centro-progresa/empresas')
   return { success: true }
 }
+
+export async function listarEmpresasVacantes(page: number = 1, query: string = '', limit: number = 20) {
+  const supabase = await createClient()
+
+  const start = (page - 1) * limit
+  const end = start + limit - 1
+
+  let q = supabase
+    .from('empresas')
+    .select('id, nombre, nit, ciudad, ofertas(id, vacantes, estado), practicas(id, estado)', { count: 'exact' })
+    .eq('activa', true)
+    .order('nombre', { ascending: true })
+
+  if (query) q = q.or(`nombre.ilike.%${query}%,nit.ilike.%${query}%`)
+
+  const { data, count, error } = await q.range(start, end)
+
+  if (error) return { data: [], count: 0, error: error.message }
+
+  // Calcular vacantes disponibles y postulados en memoria
+  const processed = await Promise.all(
+    (data || []).map(async (empresa: any) => {
+      const vacantes_totales = empresa.ofertas
+        ?.filter((o: any) => o.estado === 'activa')
+        .reduce((sum: number, o: any) => sum + (o.vacantes || 0), 0) ?? 0
+
+      const ofertaIds = empresa.ofertas?.map((o: any) => o.id) ?? []
+      let postulados = 0
+      let en_proceso = 0
+
+      if (ofertaIds.length > 0) {
+        const { data: posts } = await supabase
+          .from('postulaciones')
+          .select('estudiante_id, perfiles:estudiante_id(estado_busqueda)')
+          .in('oferta_id', ofertaIds)
+
+        posts?.forEach((p: any) => {
+          const estado = p.perfiles?.estado_busqueda
+          if (estado === 'postulado') postulados++
+          else if (estado === 'carta_enviada' || estado === 'carta_aprobada') en_proceso++
+        })
+      }
+
+      const contratados = empresa.practicas?.filter((p: any) => p.estado === 'activa').length ?? 0
+
+      return {
+        id: empresa.id,
+        nombre: empresa.nombre,
+        nit: empresa.nit,
+        ciudad: empresa.ciudad,
+        vacantes_totales,
+        postulados,
+        en_proceso,
+        contratados,
+        vacantes_disponibles: Math.max(0, vacantes_totales - contratados)
+      }
+    })
+  )
+
+  return { data: processed, count, error: null }
+}
