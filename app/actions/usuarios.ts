@@ -171,6 +171,20 @@ export async function listarProgramas() {
 
 export async function desactivarUsuario(id: string) {
   const admin = getAdminClient()
+
+  // 1. Limpiar dependencias del estudiante (simular ON DELETE CASCADE)
+  // Prácticas
+  await admin.from('practicas').delete().eq('estudiante_id', id)
+  
+  // Postulaciones y sus documentos
+  const { data: posts } = await admin.from('postulaciones').select('id').eq('estudiante_id', id)
+  if (posts && posts.length > 0) {
+    const postIds = posts.map(p => p.id)
+    await admin.from('documentos').delete().in('postulacion_id', postIds)
+    await admin.from('postulaciones').delete().in('id', postIds)
+  }
+
+  // 2. Eliminar de Auth (esto también eliminará el profile por cascade)
   const { error } = await admin.auth.admin.deleteUser(id)
   if (error) return { error: error.message }
   
@@ -250,6 +264,21 @@ export async function actualizarUsuario(id: string, formData: FormData) {
 
   if (error) return { error: error.message }
 
+  // Si es estudiante y tiene programa, calculamos el periodo académico
+  let periodo_academico: string | null = null
+  if (rol === 'estudiante' && programa_id) {
+    // Necesitamos la fecha de creación del perfil para el cálculo
+    const { data: currentProfile } = await admin.from('profiles').select('created_at, periodo_academico').eq('id', id).single()
+    
+    // Si ya tenía periodo, lo mantenemos, si no, lo calculamos
+    if (currentProfile?.periodo_academico) {
+      periodo_academico = currentProfile.periodo_academico
+    } else {
+      const createdAt = currentProfile?.created_at ? new Date(currentProfile.created_at) : new Date()
+      periodo_academico = await calcularPeriodoAcademico(programa_id, createdAt)
+    }
+  }
+
   // Actualizar la tabla profiles explícitamente
   const { error: updateError } = await admin.from('profiles').update({
     nombre,
@@ -260,7 +289,8 @@ export async function actualizarUsuario(id: string, formData: FormData) {
     programa_id: programa_id || null,
     meses_practica: meses_practica || null,
     estado_academico: estado_academico || null,
-    estado_busqueda: estado_busqueda || null
+    estado_busqueda: estado_busqueda || null,
+    periodo_academico
   }).eq('id', id)
 
   if (updateError) {

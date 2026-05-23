@@ -147,17 +147,23 @@ export async function listarEmpresasVacantes(page: number = 1, query: string = '
       if (ofertaIds.length > 0) {
         const { data: posts } = await supabase
           .from('postulaciones')
-          .select('estudiante_id, perfiles:estudiante_id(estado_busqueda)')
+          .select('estudiante_id, perfiles:estudiante_id(estado_busqueda), documentos(id)')
           .in('oferta_id', ofertaIds)
 
         posts?.forEach((p: any) => {
-          const estado = p.perfiles?.estado_busqueda
-          if (estado === 'postulado') postulados++
-          else if (estado === 'carta_enviada' || estado === 'carta_aprobada') en_proceso++
+          const estadoGlobal = p.perfiles?.estado_busqueda
+          // Si ya está contratado en alguna empresa, sus postulaciones restantes no cuentan
+          if (estadoGlobal === 'contratado') return 
+          
+          if (p.documentos && p.documentos.length > 0) {
+            en_proceso++
+          } else {
+            postulados++
+          }
         })
       }
 
-      const contratados = empresa.practicas?.filter((p: any) => p.estado === 'activa').length ?? 0
+      const contratados = empresa.practicas?.filter((p: any) => p.estado === 'en_curso').length ?? 0
 
       return {
         id: empresa.id,

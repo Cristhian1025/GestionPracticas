@@ -1,8 +1,8 @@
-import { listarEmpresasVacantes } from '@/app/actions/empresas'
+import { listarOfertasVacantes } from '@/app/actions/ofertas'
 import Link from 'next/link'
 import SearchEmpresas from '@/app/ui/centro-progresa/empresas/search-empresas'
 
-export default async function EmpresasVacantesPage(props: {
+export default async function OfertasVacantesPage(props: {
   searchParams?: Promise<{ query?: string; page?: string }>
 }) {
   const searchParams = await props.searchParams
@@ -10,16 +10,16 @@ export default async function EmpresasVacantesPage(props: {
   const currentPage = Number(searchParams?.page) || 1
   const limit = 20
 
-  const { data: empresas, count } = await listarEmpresasVacantes(currentPage, query, limit)
+  const { data: ofertas, count } = await listarOfertasVacantes(currentPage, query, limit)
   const totalPages = count ? Math.ceil(count / limit) : 0
 
   return (
     <main className="max-w-7xl mx-auto px-6 py-8">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Seguimiento de Vacantes</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Seguimiento de Vacantes por Oferta</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Vista consolidada de postulaciones, estudiantes en proceso y vacantes disponibles por empresa.
+            Vista consolidada de postulaciones, estudiantes en proceso y vacantes disponibles por cargo.
           </p>
         </div>
       </div>
@@ -31,6 +31,7 @@ export default async function EmpresasVacantesPage(props: {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-200">
+                <th className="py-3 px-4 text-sm font-semibold text-gray-600">Cargo / Oferta</th>
                 <th className="py-3 px-4 text-sm font-semibold text-gray-600">Empresa</th>
                 <th className="py-3 px-4 text-sm font-semibold text-center text-gray-600">Vacantes Totales</th>
                 <th className="py-3 px-4 text-sm font-semibold text-center text-blue-600">Postulados</th>
@@ -40,48 +41,51 @@ export default async function EmpresasVacantesPage(props: {
               </tr>
             </thead>
             <tbody>
-              {empresas && empresas.length > 0 ? (
-                empresas.map((empresa) => (
-                  <tr key={empresa.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+              {ofertas && ofertas.length > 0 ? (
+                ofertas.map((oferta) => (
+                  <tr key={oferta.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td className="py-3 px-4">
-                      <div className="font-medium text-gray-900">{empresa.nombre}</div>
-                      <div className="text-xs text-gray-500">{empresa.ciudad} · NIT: {empresa.nit}</div>
+                      <div className="font-medium text-gray-900">{oferta.cargo}</div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="font-medium text-gray-700">{oferta.empresa}</div>
+                      <div className="text-xs text-gray-500">{oferta.ciudad} · NIT: {oferta.nit}</div>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className="text-sm font-medium text-gray-700">{empresa.vacantes_totales}</span>
+                      <span className="text-sm font-medium text-gray-700">{oferta.vacantes_totales}</span>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${empresa.postulados > 0 ? 'bg-blue-100 text-blue-800' : 'text-gray-400'}`}>
-                        {empresa.postulados}
+                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${oferta.postulados > 0 ? 'bg-blue-100 text-blue-800' : 'text-gray-400'}`}>
+                        {oferta.postulados}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${empresa.en_proceso > 0 ? 'bg-yellow-100 text-yellow-800' : 'text-gray-400'}`}>
-                        {empresa.en_proceso}
+                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${oferta.en_proceso > 0 ? 'bg-yellow-100 text-yellow-800' : 'text-gray-400'}`}>
+                        {oferta.en_proceso}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${empresa.contratados > 0 ? 'bg-green-100 text-green-800' : 'text-gray-400'}`}>
-                        {empresa.contratados}
+                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${oferta.contratados > 0 ? 'bg-green-100 text-green-800' : 'text-gray-400'}`}>
+                        {oferta.contratados}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${
-                        empresa.vacantes_disponibles === 0
+                        oferta.vacantes_disponibles === 0
                           ? 'bg-red-100 text-red-700'
-                          : empresa.vacantes_disponibles <= 2
+                          : oferta.vacantes_disponibles <= 2
                           ? 'bg-orange-100 text-orange-700'
                           : 'bg-green-100 text-green-700'
                       }`}>
-                        {empresa.vacantes_disponibles}
+                        {oferta.vacantes_disponibles}
                       </span>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-sm text-gray-500">
-                    No se encontraron empresas con vacantes activas.
+                  <td colSpan={7} className="py-8 text-center text-sm text-gray-500">
+                    No se encontraron ofertas activas.
                   </td>
                 </tr>
               )}

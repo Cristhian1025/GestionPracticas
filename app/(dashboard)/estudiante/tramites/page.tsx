@@ -63,6 +63,7 @@ export default async function EstudianteTramitesPage() {
                         postulacionId={postulacion.id} 
                         documentoActual={cartaFunciones} 
                         estadoBusqueda={estado_busqueda}
+                        tienePracticaActiva={postulacion.practicas && postulacion.practicas.length > 0}
                       />
                     </div>
                   )

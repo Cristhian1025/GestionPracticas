@@ -6,11 +6,13 @@ import { subirCartaFunciones, marcarComoContratado, eliminarDocumentoRechazado }
 export default function UploadCartaFunciones({ 
   postulacionId, 
   documentoActual,
-  estadoBusqueda
+  estadoBusqueda,
+  tienePracticaActiva
 }: { 
   postulacionId: string
   documentoActual?: any
   estadoBusqueda?: string | null
+  tienePracticaActiva?: boolean
 }) {
   const [isPending, startTransition] = useTransition()
   const [isContractPending, startContractTransition] = useTransition()
@@ -113,7 +115,7 @@ export default function UploadCartaFunciones({
           </div>
         )}
 
-        {isAprobado && estadoBusqueda === 'carta_aprobada' && (
+        {isAprobado && estadoBusqueda === 'carta_aprobada' && !tienePracticaActiva && (
           <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-lg text-center">
             <h5 className="text-sm font-bold text-blue-900 mb-2">¡Tu Carta ha sido Aprobada!</h5>
             <p className="text-sm text-blue-700 mb-3">
@@ -130,9 +132,15 @@ export default function UploadCartaFunciones({
           </div>
         )}
 
-        {estadoBusqueda === 'contratado' && isAprobado && (
+        {tienePracticaActiva && (
           <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-center text-sm font-medium text-green-800">
             ✅ Práctica formalizada y en curso.
+          </div>
+        )}
+
+        {estadoBusqueda === 'contratado' && !tienePracticaActiva && (
+          <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg text-center text-sm font-medium text-gray-500">
+            Cerrada (Has formalizado otra práctica).
           </div>
         )}
       </div>

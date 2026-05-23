@@ -153,3 +153,83 @@ export async function cambiarEstadoOferta(id: string, nuevoEstado: string) {
   revalidatePath('/centro-progresa/ofertas')
   return { success: true }
 }
+
+export async function listarOfertasVacantes(page: number = 1, query: string = '', limit: number = 20) {
+  const supabase = await createClient()
+
+  const start = (page - 1) * limit
+  const end = start + limit - 1
+
+  let q = supabase
+    .from('ofertas')
+    .select('id, titulo, vacantes, estado, empresas(nombre, nit, ciudad)', { count: 'exact' })
+    .eq('estado', 'activa')
+    .order('titulo', { ascending: true })
+
+  if (query) {
+    q = q.or(`titulo.ilike.%${query}%`)
+  }
+
+  const { data, count, error } = await q.range(start, end)
+
+  if (error) return { data: [], count: 0, error: error.message }
+
+  // Calcular vacantes disponibles y postulados en memoria
+  const processed = await Promise.all(
+    (data || []).map(async (oferta: any) => {
+      const vacantes_totales = oferta.vacantes || 0
+      
+      let postulados = 0
+      let en_proceso = 0
+
+      // Create admin client to bypass RLS for postulations
+      const { createClient: createAdminClient } = await import('@supabase/supabase-js')
+      const adminClient = createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+      )
+
+      // Get postulaciones for this oferta using admin client
+      const { data: posts } = await adminClient
+        .from('postulaciones')
+        .select('id, estudiante_id, profiles:estudiante_id(estado_busqueda), documentos(id), practicas(id, estado)')
+        .eq('oferta_id', oferta.id)
+
+      let contratados = 0
+
+      posts?.forEach((p: any) => {
+        // Count hired students for this postulation
+        if (p.practicas) {
+          const practicasArray = Array.isArray(p.practicas) ? p.practicas : [p.practicas]
+          const activas = practicasArray.filter((pr: any) => pr.estado === 'en_curso')
+          contratados += activas.length
+        }
+
+        const estadoGlobal = p.profiles?.estado_busqueda
+        if (estadoGlobal === 'contratado') return 
+        
+        if (p.documentos && p.documentos.length > 0) {
+          en_proceso++
+        } else {
+          postulados++
+        }
+      })
+
+      return {
+        id: oferta.id,
+        cargo: oferta.titulo,
+        empresa: Array.isArray(oferta.empresas) ? oferta.empresas[0]?.nombre : oferta.empresas?.nombre,
+        ciudad: Array.isArray(oferta.empresas) ? oferta.empresas[0]?.ciudad : oferta.empresas?.ciudad,
+        nit: Array.isArray(oferta.empresas) ? oferta.empresas[0]?.nit : oferta.empresas?.nit,
+        vacantes_totales,
+        postulados,
+        en_proceso,
+        contratados,
+        vacantes_disponibles: Math.max(0, vacantes_totales - contratados)
+      }
+    })
+  )
+
+  return { data: processed, count, error: null }
+}

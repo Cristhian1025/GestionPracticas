@@ -16,7 +16,8 @@ export async function listarPostulacionesEstudiante() {
     .select(`
       id, origen, nombre_empresa_propia, cargo_aspirado, created_at,
       ofertas ( titulo, empresas (nombre) ),
-      documentos ( id, nombre_archivo, url_storage, estado, observaciones, tipo )
+      documentos ( id, nombre_archivo, url_storage, estado, observaciones, tipo ),
+      practicas ( id, estado )
     `)
     .eq('estudiante_id', user.id)
     .order('created_at', { ascending: false })
@@ -199,7 +200,7 @@ export async function marcarComoContratado(postulacionId: string) {
     .from('postulaciones')
     .select(`
       id, estudiante_id, origen, nombre_empresa_propia, cargo_aspirado,
-      ofertas ( empresa_id, modalidad_contrato, titulo )
+      ofertas ( id, empresa_id, modalidad_contrato, titulo )
     `)
     .eq('id', postulacionId)
     .eq('estudiante_id', user.id)
@@ -259,7 +260,7 @@ export async function marcarComoContratado(postulacionId: string) {
       empresa_id: empresaId,
       postulacion_id: postulacion.id,
       modalidad_contrato: modalidadContrato,
-      estado: 'activa',
+      estado: 'en_curso',
       cargo: cargo,
       fecha_inicio: new Date().toISOString().split('T')[0]
     })
@@ -282,7 +283,36 @@ export async function marcarComoContratado(postulacionId: string) {
     console.error('Error al actualizar estados del estudiante:', updateStudentError)
   }
 
+  // 5. Verificar si la oferta se quedó sin vacantes y cerrarla automáticamente
+  if (postulacion.origen === 'oferta_sistema' && postulacion.ofertas) {
+    const ofertaInfo: any = Array.isArray(postulacion.ofertas) ? postulacion.ofertas[0] : postulacion.ofertas
+    if (ofertaInfo && ofertaInfo.id) {
+      const ofertaId = ofertaInfo.id
+      
+      const { data: ofertaData } = await adminClient.from('ofertas').select('vacantes').eq('id', ofertaId).single()
+      if (ofertaData) {
+        // Obtener IDs de las postulaciones de esta oferta
+        const { data: postsOferta } = await adminClient.from('postulaciones').select('id').eq('oferta_id', ofertaId)
+        if (postsOferta && postsOferta.length > 0) {
+          const postIds = postsOferta.map(p => p.id)
+          // Contar prácticas en_curso de esa oferta
+          const { count: practicasCount } = await adminClient
+            .from('practicas')
+            .select('*', { count: 'exact', head: true })
+            .in('postulacion_id', postIds)
+            .eq('estado', 'en_curso')
+            
+          const contratados = practicasCount || 0
+          if (contratados >= ofertaData.vacantes) {
+            await adminClient.from('ofertas').update({ estado: 'cerrada' }).eq('id', ofertaId)
+          }
+        }
+      }
+    }
+  }
+
   revalidatePath('/estudiante/tramites')
   revalidatePath('/estudiante/ofertas')
+  revalidatePath('/centro-progresa/vacantes')
   return { success: true }
 }

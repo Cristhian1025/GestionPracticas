@@ -10,6 +10,7 @@ const links = [
   { name: 'Empresas Aliadas', href: '/centro-progresa/empresas' },
   { name: 'Ofertas Laborales', href: '/centro-progresa/ofertas' },
   { name: 'Vacantes', href: '/centro-progresa/vacantes' },
+  { name: 'Postulaciones', href: '/centro-progresa/postulaciones' },
 ]
 
 export default function CentroProgresaHeader() {
